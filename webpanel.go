@@ -28,6 +28,7 @@ func (*DevNull) Write(p []byte) (int, error) {
 func initWeb() {
 	info("Launching web service.")
 	//	web.SetLogger(log.New(&DevNull{}, "", 0))
+	web.Get("/robots.txt", robots)
 	web.Get("/(.*)", get_index)
 	web.Run(fmt.Sprintf("%s:%d", cfg.Main.Address, cfg.Main.Port))
 }
@@ -35,6 +36,14 @@ func initWeb() {
 func endWeb() {
 	info("Shutting down web service.")
 	web.Close()
+}
+
+var robotstxt = []byte("User-agent: *\nDisallow: /\n")
+
+func robots(ctx *web.Context) {
+	ctx.SetHeader("X-Robots-Tag", "noindex", true)
+	ctx.WriteHeader(200)
+	ctx.ResponseWriter.Write(robotstxt)
 }
 
 func get_index(ctx *web.Context, arg string) {
