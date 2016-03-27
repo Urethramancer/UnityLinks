@@ -12,7 +12,7 @@ import (
 	"gopkg.in/gcfg.v1"
 )
 
-const PROGVERSION string = "0.1.0"
+const PROGVERSION string = "0.2.0"
 
 type Config struct {
 	Main struct {
@@ -23,10 +23,6 @@ type Config struct {
 }
 
 var cfg Config
-
-// Update settings
-var interval int = 900
-var server_id string = "Syncer"
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -70,6 +66,7 @@ func main() {
 }
 
 func updateVersions() {
+	p("UnityLinks %s", PROGVERSION)
 	baseurl1 := "http://download.unity3d.com/download_unity/"
 	//	baseurl2 := "http://beta.unity3d.com/download/"
 	//	url2 := "http://beta.unity3d.com/download/b6c1a63227dc/unity-5.3.2p3-osx.ini"

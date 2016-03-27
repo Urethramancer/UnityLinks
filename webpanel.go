@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/ioutil"
 	"strings"
-	"sync"
 
 	"github.com/hoisie/web"
 )
@@ -16,18 +15,10 @@ type IndexPage struct {
 	Content  template.HTML
 }
 
-var indexTemplate, indexerr = template.ParseFiles("tpl/index.tpl")
-var share sync.Mutex
-
-type DevNull struct{}
-
-func (*DevNull) Write(p []byte) (int, error) {
-	return len(p), nil
-}
+var indexTemplate, _ = template.ParseFiles("tpl/index.tpl")
 
 func initWeb() {
 	info("Launching web service.")
-	//	web.SetLogger(log.New(&DevNull{}, "", 0))
 	web.Get("/robots.txt", robots)
 	web.Get("/(.*)", get_index)
 	web.Run(fmt.Sprintf("%s:%d", cfg.Main.Address, cfg.Main.Port))
