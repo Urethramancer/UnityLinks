@@ -8,11 +8,9 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"gopkg.in/gcfg.v1"
 )
 
-const PROGVERSION string = "0.2.0"
+const PROGVERSION string = "0.3.0"
 
 type Config struct {
 	Main struct {
@@ -65,14 +63,16 @@ func main() {
 	endWeb()
 }
 
+var baseurl1 = "http://download.unity3d.com/download_unity/"
+
+//	baseurl2 := "http://beta.unity3d.com/download/"
+//	url2 := "http://beta.unity3d.com/download/b6c1a63227dc/unity-5.3.2p3-osx.ini"
 func updateVersions() {
 	p("UnityLinks %s", PROGVERSION)
-	baseurl1 := "http://download.unity3d.com/download_unity/"
-	//	baseurl2 := "http://beta.unity3d.com/download/"
-	//	url2 := "http://beta.unity3d.com/download/b6c1a63227dc/unity-5.3.2p3-osx.ini"
 	files, err := ioutil.ReadDir("./updates")
 	if err != nil {
-		fatal("Error: %s.", err.Error())
+		p("Error: %s.", err.Error())
+		return
 	}
 	count := 0
 	max := 0
@@ -82,82 +82,88 @@ func updateVersions() {
 			s, _ := ioutil.ReadFile("updates/" + fi.Name())
 			if s != nil {
 				hash := strings.Replace(string(s), "\n", "", -1)
-				url := baseurl1 + hash + "/unity-" + fi.Name() + "-osx.ini"
-				info("Downloading %s", url)
-				response, err := http.Get(url)
-				if err == nil {
-					defer response.Body.Close()
-					contents, err := ioutil.ReadAll(response.Body)
-					var ini UnityIni
-					gcfg.ReadStringInto(&ini, string(contents))
-					if err == nil {
-						data := ""
-						data += ini.Unity.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Unity.Url + "\n"
-						data += ini.Unity.Md5 + "\n"
-
-						data += ini.Documentation.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Documentation.Url + "\n"
-						data += ini.Documentation.Md5 + "\n"
-
-						data += ini.Example.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Example.Url + "\n"
-						data += ini.Example.Md5 + "\n"
-
-						data += ini.WebPlayer.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.WebPlayer.Url + "\n"
-						data += ini.WebPlayer.Md5 + "\n"
-
-						data += ini.Android.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Android.Url + "\n"
-						data += ini.Android.Md5 + "\n"
-
-						data += ini.AppleTV.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.AppleTV.Url + "\n"
-						data += ini.AppleTV.Md5 + "\n"
-
-						data += ini.IOS.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.IOS.Url + "\n"
-						data += ini.IOS.Md5 + "\n"
-
-						data += ini.Linux.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Linux.Url + "\n"
-						data += ini.Linux.Md5 + "\n"
-
-						data += ini.Mac.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Mac.Url + "\n"
-						data += ini.Mac.Md5 + "\n"
-
-						data += ini.Samsung_TV.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Samsung_TV.Url + "\n"
-						data += ini.Samsung_TV.Md5 + "\n"
-
-						data += ini.Tizen.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Tizen.Url + "\n"
-						data += ini.Tizen.Md5 + "\n"
-
-						data += ini.WebGL.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.WebGL.Url + "\n"
-						data += ini.WebGL.Md5 + "\n"
-
-						data += ini.Windows.Title + "\n"
-						data += baseurl1 + hash + "/" + ini.Windows.Url + "\n"
-						data += ini.Windows.Md5 + "\n"
-
-						saveVersion(fi.Name(), data)
-						count++
-					}
-				}
+				getMacIni(hash, fi.Name())
+				getWinIni(hash, fi.Name())
+				count++
 			}
 		}
 	}
 	info("Updated %d versions out of %d.", count, max)
 }
 
+func getVar(line string) string {
+	return strings.TrimSpace(line[strings.IndexByte(line, '=')+1:])
+}
+
+func getMacIni(hash string, filename string) {
+	url := baseurl1 + hash + "/unity-" + filename + "-osx.ini"
+
+	info("Downloading %s", url)
+	response, err := http.Get(url)
+	if err != nil {
+		p("Error downloading: %s", err.Error())
+		return
+	}
+	defer response.Body.Close()
+	bs, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		p("Error fetching OS X version: %s\n", err.Error())
+		return
+	}
+	contents := string(bs)
+	sections := strings.Split(contents, "[")
+	data := ""
+	for _, s := range sections {
+		if len(s) > 0 {
+			lines := strings.Split(s, "\n")
+			data += getVar(lines[1]) + "\n"
+			data += getVar(lines[2]) + "\n"
+			data += baseurl1 + hash + "/" + getVar(lines[3]) + "\n"
+			data += getVar(lines[4]) + "\n"
+		}
+	}
+	p("Saving %s (OS X)\n", filename)
+	saveVersion(filename, data)
+}
+
+//TODO: gcfg can't read the -win.ini properly. Make custom hack.
+func getWinIni(hash string, filename string) {
+	url := baseurl1 + hash + "/unity-" + filename + "-win.ini"
+
+	info("Downloading %s", url)
+	response, err := http.Get(url)
+	if err != nil {
+		p("Error downloading: %s", err.Error())
+		return
+	}
+	defer response.Body.Close()
+	bs, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		p("Error fetching Windows version: %s\n", err.Error())
+		return
+	}
+	contents := string(bs)
+	sections := strings.Split(contents, "[")
+	data := ""
+	for _, s := range sections {
+		if len(s) > 0 {
+			lines := strings.Split(s, "\n")
+			data += getVar(lines[1]) + "\n"
+			data += getVar(lines[2]) + "\n"
+			l3 := baseurl1 + hash + "/" + getVar(lines[3])
+			l4 := baseurl1 + hash + "/" + getVar(lines[4])
+			data += l3 + "\n" + l4 + "\n"
+		}
+	}
+	p("Saving %s (Windows)\n", filename)
+	saveVersion(filename+".win", data)
+}
+
 func saveVersion(version string, data string) {
 	file, err := os.OpenFile("versions/"+version, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		fatal("Error: %s.", err.Error())
+		p("Error: %s.", err.Error())
+		return
 	}
 
 	defer file.Close()
@@ -168,7 +174,8 @@ func saveVersion(version string, data string) {
 func displayVersions() {
 	files, err := ioutil.ReadDir("versions")
 	if err != nil {
-		fatal("Error: %s.", err.Error())
+		p("Error: %s.", err.Error())
+		return
 	}
 	for _, fi := range files {
 		if !fi.IsDir() {
