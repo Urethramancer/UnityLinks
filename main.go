@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const PROGVERSION string = "0.3.0"
+const PROGVERSION string = "0.4.0"
 
 type Config struct {
 	Main struct {
