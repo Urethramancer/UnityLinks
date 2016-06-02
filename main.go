@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const PROGVERSION string = "0.4.0"
+const PROGVERSION string = "0.4.1"
 
 type Config struct {
 	Main struct {
@@ -98,6 +98,7 @@ func getMacIni(hash string, filename string) {
 	url := baseurl1 + hash + "/unity-" + filename + "-osx.ini"
 	url2 := baseurl2 + hash + "/unity-" + filename + "-osx.ini"
 
+	mybase := baseurl1
 	info("Downloading %s", url)
 	response, _ := http.Get(url)
 	p("Status: %d\n", response.StatusCode)
@@ -108,6 +109,7 @@ func getMacIni(hash string, filename string) {
 			p("Error downloading %s\n", url2)
 			return
 		}
+		mybase = baseurl2
 	}
 	defer response.Body.Close()
 	bs, err := ioutil.ReadAll(response.Body)
@@ -123,7 +125,7 @@ func getMacIni(hash string, filename string) {
 			lines := strings.Split(s, "\n")
 			data += getVar(lines[1]) + "\n"
 			data += getVar(lines[2]) + "\n"
-			data += baseurl1 + hash + "/" + getVar(lines[3]) + "\n"
+			data += mybase + hash + "/" + getVar(lines[3]) + "\n"
 			data += getVar(lines[4]) + "\n"
 		}
 	}
@@ -135,6 +137,7 @@ func getMacIni(hash string, filename string) {
 func getWinIni(hash string, filename string) {
 	url := baseurl1 + hash + "/unity-" + filename + "-win.ini"
 	url2 := baseurl2 + hash + "/unity-" + filename + "-win.ini"
+	mybase := baseurl1
 
 	info("Downloading %s", url)
 	response, _ := http.Get(url)
@@ -145,6 +148,7 @@ func getWinIni(hash string, filename string) {
 			p("Error downloading %s", url2)
 			return
 		}
+		mybase = baseurl2
 	}
 	defer response.Body.Close()
 	bs, err := ioutil.ReadAll(response.Body)
@@ -160,8 +164,8 @@ func getWinIni(hash string, filename string) {
 			lines := strings.Split(s, "\n")
 			data += getVar(lines[1]) + "\n"
 			data += getVar(lines[2]) + "\n"
-			l3 := baseurl1 + hash + "/" + getVar(lines[3])
-			l4 := baseurl1 + hash + "/" + getVar(lines[4])
+			l3 := mybase + hash + "/" + getVar(lines[3])
+			l4 := mybase + hash + "/" + getVar(lines[4])
 			data += l3 + "\n" + l4 + "\n"
 		}
 	}
