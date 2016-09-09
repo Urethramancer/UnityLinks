@@ -45,7 +45,7 @@ func get_index(ctx *web.Context, arg string) {
 	// If there's an argument we try to open that as a file
 	message := ""
 	windows := "<h2>Windows</h2>\n<ul>\n"
-	p("Real IP: %s", ctx.Request.Header.Get("X-Real-IP"))
+	p("Real IP: %s\n", ctx.Request.Header.Get("X-Real-IP"))
 	if arg != "" {
 		fn := sane(arg)
 		s, _ := ioutil.ReadFile("versions/" + fn)
