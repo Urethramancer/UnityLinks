@@ -1,4 +1,4 @@
-# UnityLinks
+# UnityLinks [![Build Status](https://travis-ci.org/Urethramancer/UnityLinks.svg)](https://travis-ci.org/Urethramancer/UnityLinks)
 This is a server and link parser to get the individual official package links for releases of [Unity](https://unity3d.com). Supported links at the moment are only for 5.0 and up, but others might work. See usage below.
 
 An example server exists at http://unity.grimdork.net, and is updated roughly on the day a new patch or regular version is released. Betas are not tracked.
