@@ -7,7 +7,3 @@ import (
 func info(f string, v ...interface{}) {
 	log.Printf(f, v...)
 }
-
-func fatal(f string, v ...interface{}) {
-	log.Fatalf(f, v...)
-}
