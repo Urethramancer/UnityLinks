@@ -10,8 +10,12 @@ import (
 	"time"
 )
 
-const PROGVERSION string = "0.5.1"
+const (
+	progname    = "UnityLinks"
+	progversion = "0.5.1"
+)
 
+// Config holds the setup for the web server
 type Config struct {
 	Main struct {
 		Address  string
@@ -35,11 +39,11 @@ func init() {
 }
 
 func main() {
-	var runupdates *bool = flag.Bool("u", false, "Run updates instead of launching web server.")
-	var address *string = flag.String("a", "0.0.0.0", "Address to bind to.")
-	var port *int = flag.Int("p", 8000, "Port to bind to.")
-	var display *bool = flag.Bool("d", false, "Display versions and URLs available, then exit.")
-	var version *string = flag.String("v", "", "Display a specific version. If not specified you get everything.")
+	var runupdates = flag.Bool("u", false, "Run updates instead of launching web server.")
+	var address = flag.String("a", "0.0.0.0", "Address to bind to.")
+	var port = flag.Int("p", 8000, "Port to bind to.")
+	var display = flag.Bool("d", false, "Display versions and URLs available, then exit.")
+	var version = flag.String("v", "", "Display a specific version. If not specified you get everything.")
 	flag.Parse()
 
 	if *runupdates {
@@ -67,7 +71,7 @@ var baseurl1 = "http://download.unity3d.com/download_unity/"
 var baseurl2 = "http://beta.unity3d.com/download/"
 
 func updateVersions() {
-	p("UnityLinks %s", PROGVERSION)
+	p("%s %s", progname, progversion)
 	files, err := ioutil.ReadDir("./updates")
 	if err != nil {
 		p("Error: %s.", err.Error())

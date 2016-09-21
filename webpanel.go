@@ -9,6 +9,7 @@ import (
 	"github.com/hoisie/web"
 )
 
+// IndexPage holds basic variables for the index template
 type IndexPage struct {
 	Title    string
 	Sitename string
@@ -20,7 +21,7 @@ var indexTemplate, _ = template.ParseFiles("tpl/index.tpl")
 func initWeb() {
 	info("Launching web service.")
 	web.Get("/robots.txt", robots)
-	web.Get("/(.*)", get_index)
+	web.Get("/(.*)", getIndex)
 	web.Run(fmt.Sprintf("%s:%d", cfg.Main.Address, cfg.Main.Port))
 }
 
@@ -37,7 +38,7 @@ func robots(ctx *web.Context) {
 	ctx.ResponseWriter.Write(robotstxt)
 }
 
-func get_index(ctx *web.Context, arg string) {
+func getIndex(ctx *web.Context, arg string) {
 	ctx.SetHeader("Content-type", "text/html", true)
 	ctx.SetHeader("Cache-Control", "no-cache", true)
 	title := cfg.Main.Sitename
