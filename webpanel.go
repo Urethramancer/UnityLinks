@@ -82,7 +82,7 @@ func getIndex(ctx *web.Context, arg string) {
 	} else {
 		files, err := ioutil.ReadDir("versions")
 		if err == nil {
-			message = "<h2>OS X</h2>\n<ul>\n"
+			message = "<h2>macOS</h2>\n<ul>\n"
 			for _, fi := range files {
 				if !fi.IsDir() {
 					if fi.Name()[len(fi.Name())-4:] == ".win" {

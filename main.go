@@ -12,7 +12,7 @@ import (
 
 const (
 	progname    = "UnityLinks"
-	progversion = "0.5.2"
+	progversion = "0.5.3"
 )
 
 // Config holds the setup for the web server
@@ -118,7 +118,7 @@ func getMacIni(hash string, filename string) {
 	defer response.Body.Close()
 	bs, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		p("Error fetching OS X version: %s\n", err.Error())
+		p("Error fetching macOS version: %s\n", err.Error())
 		return
 	}
 	contents := string(bs)
@@ -133,7 +133,7 @@ func getMacIni(hash string, filename string) {
 			data += getVar(lines[4]) + "\n"
 		}
 	}
-	p("Saving %s (OS X)\n", filename)
+	p("Saving %s (macOS)\n", filename)
 	saveVersion(filename, data)
 }
 
