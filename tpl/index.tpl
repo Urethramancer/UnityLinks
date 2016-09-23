@@ -3,6 +3,7 @@
 		<title>{{.Title}}</title>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 		<meta name="author" content="Neural Short-Circuit">
+		<link href="main.css" rel="stylesheet">
 	</head>
 	<body>
 		<div id="wrap">
