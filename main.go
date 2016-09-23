@@ -12,7 +12,7 @@ import (
 
 const (
 	progname    = "UnityLinks"
-	progversion = "0.5.3"
+	progversion = "0.5.4"
 )
 
 // Config holds the setup for the web server
