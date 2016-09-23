@@ -45,7 +45,7 @@ func getIndex(ctx *web.Context, arg string) {
 	name := cfg.Main.Sitename
 	// If there's an argument we try to open that as a file
 	message := ""
-	windows := "<h2>Windows</h2>\n<ul>\n"
+	windows := "<div id=\"windows\"><h2>Windows</h2>\n<ul>\n"
 	p("Real IP: %s\n", ctx.Request.Header.Get("X-Real-IP"))
 	if arg != "" {
 		fn := sane(arg)
@@ -82,7 +82,7 @@ func getIndex(ctx *web.Context, arg string) {
 	} else {
 		files, err := ioutil.ReadDir("versions")
 		if err == nil {
-			message = "<h2>macOS</h2>\n<ul>\n"
+			message = "<div id=\"macos\"<h2>macOS</h2>\n<ul>\n"
 			for _, fi := range files {
 				if !fi.IsDir() {
 					if fi.Name()[len(fi.Name())-4:] == ".win" {
@@ -93,8 +93,8 @@ func getIndex(ctx *web.Context, arg string) {
 					}
 				}
 			}
-			message += "</ul>\n"
-			message += windows + "</ul>\n"
+			message += "</ul></div>\n"
+			message += windows + "</ul></div>\n"
 		}
 	}
 	msg := template.HTML(message)

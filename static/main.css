@@ -1,0 +1,15 @@
+body, html {margin:0;padding:0;color:#333;background:#e8ecf0;}
+ul {list-style-image:url("unity.png");}
+#wrap {width:100%;margin:0 auto;}
+#header {margin:8px;padding-left:4px;border:2px solid #d5d9dc;border-radius:5px;font:2rem Helvetica,Arial,sans-serif;}
+#macos {
+	float:left;
+	width:50%;
+	font:2.7rem Helvetica,Arial,sans-serif;
+}
+
+#windows {
+	float:right;
+	width:50%;
+	font:2.7rem Helvetica,Arial,sans-serif;
+}
