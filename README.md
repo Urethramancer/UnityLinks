@@ -57,5 +57,13 @@ or
 
 The running server should now have an extra page of links for each version, if all went well. The update method uses a few different links out of the possible ones Unity Technologies have available, which may help when the regular installer fails.
 
+### Scarping parches
+New in v0.6.0 is the option to guess the latest few patch updates and fetch their details automatically:
+```sh
+./UnityLinks -s
+```
+
+And that's it. With the current layout of the patch page the latest five patches should now have been added to the versions/ folder.
+
 ## Licence
 MIT.
