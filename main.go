@@ -6,14 +6,16 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
 const (
-	progname    = "UnityLinks"
-	progversion = "0.5.4"
+	progname = "UnityLinks"
 )
+
+var Version = "Undefined"
 
 // Config holds the setup for the web server
 type Config struct {
@@ -43,7 +45,8 @@ func main() {
 	var address = flag.String("a", "0.0.0.0", "Address to bind to.")
 	var port = flag.Int("p", 8000, "Port to bind to.")
 	var display = flag.Bool("d", false, "Display versions and URLs available, then exit.")
-	var version = flag.String("v", "", "Display a specific version. If not specified you get everything.")
+	var ver = flag.String("v", "", "Display a specific version. If not specified you get everything.")
+	var scrape = flag.Bool("s", false, "Scrape the Unity patches page for the latest available patch versions.")
 	flag.Parse()
 
 	if *runupdates {
@@ -52,10 +55,26 @@ func main() {
 	}
 
 	if *display {
-		if *version == "" {
+		if *ver == "" {
 			displayVersions()
 		} else {
-			displayVersion(*version)
+			displayVersion(*ver)
+		}
+		return
+	}
+
+	if *scrape {
+		patches, err := GetPatches("https://unity3d.com/unity/qa/patch-releases")
+		if err != nil {
+			p("Error: %s", err.Error())
+			return
+		}
+		for _, patch := range patches {
+			filename := filepath.Join("versions", patch.Name)
+			if !fexists(filename) {
+				GetMacIni(patch.Hash, patch.Name)
+				GetWinIni(patch.Hash, patch.Name)
+			}
 		}
 		return
 	}
@@ -67,11 +86,8 @@ func main() {
 	endWeb()
 }
 
-var baseurl1 = "http://download.unity3d.com/download_unity/"
-var baseurl2 = "http://beta.unity3d.com/download/"
-
 func updateVersions() {
-	p("%s %s", progname, progversion)
+	p("%s %s", progname, Version)
 	files, err := ioutil.ReadDir("./updates")
 	if err != nil {
 		p("Error: %s.", err.Error())
@@ -85,8 +101,8 @@ func updateVersions() {
 			s, _ := ioutil.ReadFile("updates/" + fi.Name())
 			if s != nil {
 				hash := strings.Replace(string(s), "\n", "", -1)
-				getMacIni(hash, fi.Name())
-				getWinIni(hash, fi.Name())
+				GetMacIni(hash, fi.Name())
+				GetWinIni(hash, fi.Name())
 				count++
 			}
 		}
@@ -98,11 +114,11 @@ func getVar(line string) string {
 	return strings.TrimSpace(line[strings.IndexByte(line, '=')+1:])
 }
 
-func getMacIni(hash string, filename string) {
-	url := baseurl1 + hash + "/unity-" + filename + "-osx.ini"
-	url2 := baseurl2 + hash + "/unity-" + filename + "-osx.ini"
+func GetMacIni(hash string, filename string) {
+	url := downloadurl + hash + "/unity-" + filename + "-osx.ini"
+	url2 := betaurl + hash + "/unity-" + filename + "-osx.ini"
 
-	mybase := baseurl1
+	mybase := downloadurl
 	info("Downloading %s", url)
 	response, _ := http.Get(url)
 	p("Status: %d\n", response.StatusCode)
@@ -113,7 +129,7 @@ func getMacIni(hash string, filename string) {
 			p("Error downloading %s\n", url2)
 			return
 		}
-		mybase = baseurl2
+		mybase = betaurl
 	}
 	defer response.Body.Close()
 	bs, err := ioutil.ReadAll(response.Body)
@@ -138,10 +154,10 @@ func getMacIni(hash string, filename string) {
 }
 
 //TODO: gcfg can't read the -win.ini properly. Make custom hack.
-func getWinIni(hash string, filename string) {
-	url := baseurl1 + hash + "/unity-" + filename + "-win.ini"
-	url2 := baseurl2 + hash + "/unity-" + filename + "-win.ini"
-	mybase := baseurl1
+func GetWinIni(hash string, filename string) {
+	url := downloadurl + hash + "/unity-" + filename + "-win.ini"
+	url2 := betaurl + hash + "/unity-" + filename + "-win.ini"
+	mybase := downloadurl
 
 	info("Downloading %s", url)
 	response, _ := http.Get(url)
@@ -152,7 +168,7 @@ func getWinIni(hash string, filename string) {
 			p("Error downloading %s", url2)
 			return
 		}
-		mybase = baseurl2
+		mybase = betaurl
 	}
 	defer response.Body.Close()
 	bs, err := ioutil.ReadAll(response.Body)
