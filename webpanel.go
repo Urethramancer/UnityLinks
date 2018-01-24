@@ -22,7 +22,7 @@ func initWeb() {
 	info("Launching web service.")
 	web.Get("/robots.txt", robots)
 	web.Get("/(.*)", getIndex)
-	web.Run(fmt.Sprintf("%s:%d", cfg.Main.Address, cfg.Main.Port))
+	go web.Run(fmt.Sprintf("%s:%d", cfg.Main.Address, cfg.Main.Port))
 }
 
 func endWeb() {
