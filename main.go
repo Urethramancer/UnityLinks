@@ -11,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/Urethramancer/gon"
 )
 
 const (
@@ -66,20 +68,13 @@ func main() {
 	}
 
 	if *scrape {
-		patches, err := GetPatches("https://unity3d.com/unity/qa/patch-releases")
-		if err != nil {
-			p("Error: %s", err.Error())
-			return
-		}
-		for _, patch := range patches {
-			filename := filepath.Join("versions", patch.Name)
-			if !fexists(filename) {
-				GetMacIni(patch.Hash, patch.Name)
-				GetWinIni(patch.Hash, patch.Name)
-			}
-		}
+		updatePatches()
 		return
 	}
+
+	sc := gon.NewScheduler()
+	sc.RepeatHours(1, updater)
+	sc.RepeatHours(4, patchUpdater)
 
 	cfg.Main.Address = *address
 	cfg.Main.Port = *port
@@ -95,6 +90,29 @@ func main() {
 		quit <- true
 	}()
 	<-quit
+}
+
+func patchUpdater(id int64) {
+	updatePatches()
+}
+
+func updater(id int64) {
+	updateVersions()
+}
+
+func updatePatches() {
+	patches, err := GetPatches("https://unity3d.com/unity/qa/patch-releases")
+	if err != nil {
+		p("Error: %s", err.Error())
+		return
+	}
+	for _, patch := range patches {
+		filename := filepath.Join("versions", patch.Name)
+		if !fexists(filename) {
+			GetMacIni(patch.Hash, patch.Name)
+			GetWinIni(patch.Hash, patch.Name)
+		}
+	}
 }
 
 func updateVersions() {
