@@ -6,8 +6,10 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -83,7 +85,16 @@ func main() {
 	cfg.Main.Port = *port
 	cfg.Main.Sitename = "Unity download links"
 	initWeb()
-	endWeb()
+	ch := make(chan os.Signal, 1)
+	quit := make(chan bool, 0)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-ch
+		p("Received quit signal.\n")
+		endWeb()
+		quit <- true
+	}()
+	<-quit
 }
 
 func updateVersions() {
